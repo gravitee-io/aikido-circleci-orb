@@ -48,7 +48,7 @@ A [Development orb](https://circleci.com/docs/orb-concepts/#development-orbs) ca
 
 ```yaml
 - orb-tools/publish:
-    orb_name: gravitee-io/aikido-circleci-orb
+    orb_name: gravitee-io/aikido
     vcs_type: << pipeline.project.type >>
     pub_type: dev
     # Ensure this job requires all test jobs and the pack job.

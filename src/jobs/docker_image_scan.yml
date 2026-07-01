@@ -1,0 +1,57 @@
+description: >
+  Ready-to-use job that (optionally) builds a Docker image and scans it with the
+  Aikido local scanner. Runs on a machine executor so the scanner has a Docker
+  daemon available. Use the scan_docker_image command directly if you already
+  have your own build job.
+
+executor: default
+
+parameters:
+  image:
+    type: string
+    default: "ubuntu-2204:current"
+    description: "Machine image for the executor."
+  checkout:
+    type: boolean
+    default: true
+    description: "Whether to run `checkout` before building/scanning."
+  build_command:
+    type: string
+    default: ""
+    description: >
+      Optional shell command that builds/loads the image locally before scanning
+      (e.g. 'docker build -t myapp:$CIRCLE_SHA1 .'). Leave empty if the image is
+      already present.
+  docker_image_to_scan:
+    type: string
+    description: "The local Docker image (name:tag) to scan."
+  aikido_api_key:
+    type: env_var_name
+    default: AIKIDO_API_KEY
+    description: "Env var holding the Aikido CI API key (AIK_CI_xxx)."
+  fail_on:
+    type: enum
+    enum: ["", "low", "medium", "high", "critical"]
+    default: "critical"
+    description: "Fail the build on issues at or above this severity ('' disables gating)."
+  scanner_version:
+    type: string
+    default: "latest"
+    description: "Tag of aikidosecurity/local-scanner to use."
+
+steps:
+  - when:
+      condition: << parameters.checkout >>
+      steps:
+        - checkout
+  - when:
+      condition: << parameters.build_command >>
+      steps:
+        - run:
+            name: Build image
+            command: << parameters.build_command >>
+  - scan_docker_image:
+      docker_image_to_scan: << parameters.docker_image_to_scan >>
+      aikido_api_key: << parameters.aikido_api_key >>
+      fail_on: << parameters.fail_on >>
+      scanner_version: << parameters.scanner_version >>

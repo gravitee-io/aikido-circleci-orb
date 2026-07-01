@@ -1,0 +1,29 @@
+description: >
+  Build a Docker image and scan it with the Aikido local scanner, failing the
+  build on critical issues. The Aikido CI API key is provided through a context
+  as the AIKIDO_API_KEY environment variable.
+
+usage:
+  version: 2.1
+  orbs:
+    aikido: gravitee-io/aikido-circleci-orb@1.0.0
+  jobs:
+    build-and-scan:
+      machine:
+        image: ubuntu-2204:current
+      steps:
+        - checkout
+        - run: docker build -t myapp:$CIRCLE_SHA1 .
+        # Use the command inside your own job when you already build the image.
+        - aikido/scan_docker_image:
+            docker_image_to_scan: myapp:$CIRCLE_SHA1
+            fail_on: critical
+  workflows:
+    scan:
+      jobs:
+        # Or use the ready-made job that builds and scans in one step.
+        - aikido/docker_image_scan:
+            context: aikido
+            build_command: "docker build -t myapp:$CIRCLE_SHA1 ."
+            docker_image_to_scan: "myapp:$CIRCLE_SHA1"
+            fail_on: critical

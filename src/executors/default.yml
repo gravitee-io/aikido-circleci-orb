@@ -1,0 +1,15 @@
+description: >
+  Machine executor with a working Docker daemon. Required by the Aikido local
+  scanner, which bind-mounts /var/run/docker.sock — this is not reliably
+  available under setup_remote_docker, so a machine executor is used.
+
+machine:
+  image: << parameters.image >>
+
+parameters:
+  image:
+    type: string
+    default: "ubuntu-2204:current"
+    description: >
+      The machine image to use:
+      https://circleci.com/developer/images?imageType=machine

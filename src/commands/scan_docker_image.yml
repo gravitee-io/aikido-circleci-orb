@@ -1,0 +1,42 @@
+description: >
+  Scans a locally-available Docker image with the Aikido local scanner and
+  uploads the results to the Aikido platform. Requires a running Docker daemon
+  (use a machine executor). Optionally fails the build on issues at or above a
+  given severity via --fail-on.
+
+parameters:
+  docker_image_to_scan:
+    type: string
+    description: "The local Docker image (name:tag) to scan, e.g. myapp:1.2.3."
+  aikido_api_key:
+    type: env_var_name
+    default: AIKIDO_API_KEY
+    description: >
+      Name of the environment variable holding the Aikido CI API key
+      (AIK_CI_xxx). Set it as a project/context env var, never inline.
+  fail_on:
+    type: enum
+    enum: ["", "low", "medium", "high", "critical"]
+    default: "critical"
+    description: >
+      Fail the build when issues at or above this severity are found.
+      Set to an empty string to disable gating (report only).
+  scanner_version:
+    type: string
+    default: "latest"
+    description: "Tag of the aikidosecurity/local-scanner image to use."
+  extra_args:
+    type: string
+    default: ""
+    description: "Additional raw arguments passed through to the image-scan command."
+
+steps:
+  - run:
+      name: Aikido Docker Image Scan
+      environment:
+        PARAM_IMAGE: << parameters.docker_image_to_scan >>
+        PARAM_API_KEY: << parameters.aikido_api_key >>
+        PARAM_FAIL_ON: << parameters.fail_on >>
+        PARAM_SCANNER_VERSION: << parameters.scanner_version >>
+        PARAM_EXTRA_ARGS: << parameters.extra_args >>
+      command: <<include(scripts/scan_image.sh)>>
