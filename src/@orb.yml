@@ -1,0 +1,11 @@
+version: 2.1
+
+description: >
+  Jobs and commands to scan Docker images with Aikido Security's local scanner
+  (aikidosecurity/local-scanner). Runs the scan locally against the Docker
+  daemon and uploads the results to the Aikido platform, with optional build
+  gating via --fail-on.
+
+display:
+  home_url: "https://help.aikido.dev/container-image-scanning"
+  source_url: "https://github.com/gravitee-io/aikido-circleci-orb"
