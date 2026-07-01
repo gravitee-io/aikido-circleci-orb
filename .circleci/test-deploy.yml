@@ -1,0 +1,59 @@
+version: 2.1
+orbs:
+  # Your orb will be automatically injected here during the pipeline.
+  # Reference your orb's jobs and commands below as they will exist when built.
+  orb-tools: circleci/orb-tools@12.3
+  # The orb definition is intentionally not included here. It will be injected into the pipeline.
+  aikido-circleci-orb: {}
+
+# Use this tag to ensure test jobs always run,
+# even though the downstream publish job will only run on release tags.
+filters: &filters
+  tags:
+    only: /.*/
+
+# Filter for release tags.
+release-filters: &release-filters
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
+jobs:
+  # Integration test: build a tiny image and scan it with the orb's command.
+  # fail_on is empty so the test does not fail on findings in the sample image.
+  # Requires an "aikido" context providing AIKIDO_API_KEY (see workflow below).
+  command-test:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+      - run:
+          name: Build a sample image to scan
+          command: |
+            printf 'FROM alpine:3.20\n' > Dockerfile.test
+            docker build -t aikido-orb-test:$CIRCLE_SHA1 -f Dockerfile.test .
+      - aikido-circleci-orb/scan_docker_image:
+          docker_image_to_scan: aikido-orb-test:$CIRCLE_SHA1
+          fail_on: ""
+workflows:
+  test-deploy:
+    jobs:
+      # Make sure to include "filters: *filters" in every test job you want to run as part of your deployment.
+      # Test your orb's commands in a custom job and test your orb's jobs directly as a part of this workflow.
+      - command-test:
+          context: aikido
+          filters: *filters
+      # The orb must be re-packed for publishing, and saved to the workspace.
+      - orb-tools/pack:
+          filters: *release-filters
+      - orb-tools/publish:
+          orb_name: gravitee-io/aikido-circleci-orb
+          vcs_type: << pipeline.project.type >>
+          pub_type: production
+          # Ensure this job requires all test jobs and the pack job.
+          requires:
+            - orb-tools/pack
+            - command-test
+          context: orb-publishing
+          filters: *release-filters
