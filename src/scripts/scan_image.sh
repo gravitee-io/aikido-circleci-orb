@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "${PARAM_DRY_RUN:-false}" = "true" ]; then
-  echo "Dry run: pulling scanner image and printing help (no API key required, no scan performed)."
-  docker run --rm "aikidosecurity/local-scanner:${PARAM_SCANNER_VERSION}" image-scan --help
-  exit 0
-fi
-
 # The API key parameter is an env_var_name; resolve it indirectly.
 API_KEY="${!PARAM_API_KEY:-}"
 if [ -z "${API_KEY}" ]; then

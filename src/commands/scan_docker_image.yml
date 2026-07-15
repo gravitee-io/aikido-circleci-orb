@@ -44,13 +44,23 @@ parameters:
     description: "Additional raw arguments passed through to the image-scan command."
 
 steps:
-  - run:
-      name: Aikido Docker Image Scan
-      environment:
-        PARAM_IMAGE: << parameters.docker_image_to_scan >>
-        PARAM_API_KEY: << parameters.aikido_api_key >>
-        PARAM_DRY_RUN: << parameters.dry_run >>
-        PARAM_FAIL_ON: << parameters.fail_on >>
-        PARAM_SCANNER_VERSION: << parameters.scanner_version >>
-        PARAM_EXTRA_ARGS: << parameters.extra_args >>
-      command: <<include(scripts/scan_image.sh)>>
+  - when:
+      condition: << parameters.dry_run >>
+      steps:
+        - run:
+            name: Aikido Docker Image Scan (dry run)
+            environment:
+              PARAM_SCANNER_VERSION: << parameters.scanner_version >>
+            command: <<include(scripts/scan_image_dry_run.sh)>>
+  - unless:
+      condition: << parameters.dry_run >>
+      steps:
+        - run:
+            name: Aikido Docker Image Scan
+            environment:
+              PARAM_IMAGE: << parameters.docker_image_to_scan >>
+              PARAM_API_KEY: << parameters.aikido_api_key >>
+              PARAM_FAIL_ON: << parameters.fail_on >>
+              PARAM_SCANNER_VERSION: << parameters.scanner_version >>
+              PARAM_EXTRA_ARGS: << parameters.extra_args >>
+            command: <<include(scripts/scan_image.sh)>>
