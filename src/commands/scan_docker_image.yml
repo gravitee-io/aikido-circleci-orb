@@ -7,13 +7,26 @@ description: >
 parameters:
   docker_image_to_scan:
     type: string
-    description: "The local Docker image (name:tag) to scan, e.g. myapp:1.2.3."
+    default: ""
+    description: >
+      The local Docker image (name:tag) to scan, e.g. myapp:1.2.3. Not required
+      when dry_run is true.
   aikido_api_key:
     type: env_var_name
     default: AIKIDO_API_KEY
     description: >
       Name of the environment variable holding the Aikido CI API key
-      (AIK_CI_xxx). Set it as a project/context env var, never inline.
+      (AIK_CI_xxx). Set it as a project/context env var, never inline. Not
+      required when dry_run is true.
+  dry_run:
+    type: boolean
+    default: false
+    description: >
+      When true, pulls the scanner image and runs it with --help instead of
+      performing a real scan. Validates the Docker wiring (socket access,
+      image pull, parameter plumbing) without needing a real API key. Useful
+      for testing this orb's CI pipeline without exposing an Aikido API key
+      to every project/PR that builds it.
   fail_on:
     type: enum
     enum: ["", "low", "medium", "high", "critical"]
@@ -36,6 +49,7 @@ steps:
       environment:
         PARAM_IMAGE: << parameters.docker_image_to_scan >>
         PARAM_API_KEY: << parameters.aikido_api_key >>
+        PARAM_DRY_RUN: << parameters.dry_run >>
         PARAM_FAIL_ON: << parameters.fail_on >>
         PARAM_SCANNER_VERSION: << parameters.scanner_version >>
         PARAM_EXTRA_ARGS: << parameters.extra_args >>

@@ -20,22 +20,16 @@ release-filters: &release-filters
     only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
 jobs:
-  # Integration test: build a tiny image and scan it with the orb's command.
-  # fail_on is empty so the test does not fail on findings in the sample image.
-  # Requires an "aikido" context providing AIKIDO_API_KEY (see workflow below).
+  # Integration test: exercise the command's Docker wiring (socket access,
+  # scanner image pull, parameter plumbing) in dry_run mode, so no Aikido API
+  # key or context is needed just to validate the orb's pipeline.
   command-test:
     machine:
       image: ubuntu-2204:current
     steps:
       - checkout
-      - run:
-          name: Build a sample image to scan
-          command: |
-            printf 'FROM alpine:3.20\n' > Dockerfile.test
-            docker build -t aikido-orb-test:$CIRCLE_SHA1 -f Dockerfile.test .
       - aikido/scan_docker_image:
-          docker_image_to_scan: aikido-orb-test:$CIRCLE_SHA1
-          fail_on: ""
+          dry_run: true
 
 workflows:
   test-deploy:
@@ -43,7 +37,6 @@ workflows:
       # Make sure to include "filters: *filters" in every test job you want to run as part of your deployment.
       # Test your orb's commands in a custom job and test your orb's jobs directly as a part of this workflow.
       - command-test:
-          context: aikido
           filters: *filters
       # The orb must be re-packed for publishing, and saved to the workspace.
       - orb-tools/pack:
