@@ -8,6 +8,12 @@ filters: &filters
   tags:
     only: /.*/
 
+# Branches only, no tags: keeps this dev publish from racing/shadowing the
+# production publish that test-deploy.yml runs on release tags.
+dev-filters: &dev-filters
+  tags:
+    ignore: /.*/
+
 workflows:
   lint-pack:
     jobs:
@@ -23,13 +29,14 @@ workflows:
       - orb-tools/publish:
           orb_name: gravitee-io/aikido
           vcs_type: << pipeline.project.type >>
+          pub_type: dev
           requires:
             - orb-tools/lint
             - orb-tools/pack
             - orb-tools/review
             - shellcheck/check
           context: keeper-orb-publishing
-          filters: *filters
+          filters: *dev-filters
       - orb-tools/continue:
           pipeline_number: << pipeline.number >>
           vcs_type: << pipeline.project.type >>
