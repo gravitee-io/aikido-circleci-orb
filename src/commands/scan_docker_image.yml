@@ -9,8 +9,16 @@ parameters:
     type: string
     default: ""
     description: >
-      The local Docker image (name:tag) to scan, e.g. myapp:1.2.3. Not required
-      when dry_run is true.
+      The local Docker image (name:tag) to scan, e.g. myapp:1.2.3. Leave empty
+      and set built_docker_image_file to scan a list of images instead. Not
+      required when dry_run is true.
+  built_docker_image_file:
+    type: string
+    default: ""
+    description: >
+      Path to a file listing one Docker image (name:tag) per line to scan.
+      Used only when docker_image_to_scan is empty. Each image is scanned in
+      turn; the step fails on the first image that fails its scan.
   aikido_api_key:
     type: env_var_name
     default: AIKIDO_API_KEY
@@ -59,6 +67,7 @@ steps:
             name: Aikido Docker Image Scan
             environment:
               PARAM_IMAGE: << parameters.docker_image_to_scan >>
+              PARAM_IMAGE_FILE: << parameters.built_docker_image_file >>
               PARAM_API_KEY: << parameters.aikido_api_key >>
               PARAM_FAIL_ON: << parameters.fail_on >>
               PARAM_SCANNER_VERSION: << parameters.scanner_version >>
