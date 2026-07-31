@@ -20,6 +20,11 @@ if [ -n "${PARAM_FAIL_ON:-}" ]; then
   FAIL_ARG="--fail-on ${PARAM_FAIL_ON}"
 fi
 
+FORCE_IMG_CREATION=""
+if [ "${PARAM_FORCE_IMG_CREATION:-}" = true ]; then
+  FORCE_IMG_CREATION="--force-create-image-for-tag"
+fi
+
 scan_one() {
   local image="$1"
   echo "Scanning image: ${image}"
@@ -30,7 +35,7 @@ scan_one() {
   docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
     "aikidosecurity/local-scanner:${PARAM_SCANNER_VERSION}" \
     image-scan "${image}" \
-    --apikey "${API_KEY}" \
+    --apikey "${API_KEY}" "${FORCE_IMG_CREATION}"\
     ${FAIL_ARG} ${PARAM_EXTRA_ARGS:-}
 }
 

@@ -50,6 +50,10 @@ parameters:
     type: string
     default: ""
     description: "Additional raw arguments passed through to the image-scan command."
+  force_image_creation:
+    type: boolean
+    default: true
+    description: "Create a new image in Aikido with the tag instead of updating the tag on existing image."
 
 steps:
   - when:
@@ -72,4 +76,5 @@ steps:
               PARAM_FAIL_ON: << parameters.fail_on >>
               PARAM_SCANNER_VERSION: << parameters.scanner_version >>
               PARAM_EXTRA_ARGS: << parameters.extra_args >>
+              PARAM_FORCE_IMG_CREATION: << parameters.force_image_creation >>
             command: <<include(scripts/scan_image.sh)>>
