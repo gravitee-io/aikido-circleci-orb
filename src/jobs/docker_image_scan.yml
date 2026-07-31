@@ -47,6 +47,10 @@ parameters:
     type: string
     default: "latest"
     description: "Tag of aikidosecurity/local-scanner to use."
+  force_image_creation:
+    type: boolean
+    default: true
+    description: "Create a new image in Aikido with the tag instead of updating the tag on existing image."
 
 steps:
   - when:
@@ -65,3 +69,4 @@ steps:
       aikido_api_key: << parameters.aikido_api_key >>
       fail_on: << parameters.fail_on >>
       scanner_version: << parameters.scanner_version >>
+      force_image_creation: << parameters.force_image_creation >>
