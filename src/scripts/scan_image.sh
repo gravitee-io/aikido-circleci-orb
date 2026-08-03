@@ -35,7 +35,7 @@ scan_one() {
   docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
     "aikidosecurity/local-scanner:${PARAM_SCANNER_VERSION}" \
     image-scan "${image}" \
-    --apikey "${API_KEY}" "${FORCE_IMG_CREATION}"\
+    --apikey "${API_KEY}" "${FORCE_IMG_CREATION}" \
     ${FAIL_ARG} ${PARAM_EXTRA_ARGS:-}
 }
 
