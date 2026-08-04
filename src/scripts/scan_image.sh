@@ -20,22 +20,18 @@ if [ -n "${PARAM_FAIL_ON:-}" ]; then
   FAIL_ARG="--fail-on ${PARAM_FAIL_ON}"
 fi
 
-FORCE_IMG_CREATION=""
-if [ "${PARAM_FORCE_IMG_CREATION:-}" = true ]; then
-  FORCE_IMG_CREATION="--force-create-image-for-tag"
-fi
-
 scan_one() {
   local image="$1"
   echo "Scanning image: ${image}"
   echo "Scanner: aikidosecurity/local-scanner:${PARAM_SCANNER_VERSION}"
   [ -n "${FAIL_ARG}" ] && echo "Gating: ${FAIL_ARG}"
+  [ -n "${PARAM_EXTRA_ARGS}" ] && echo "Extra Arguments: ${PARAM_EXTRA_ARGS}"
 
   # shellcheck disable=SC2086
   docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
     "aikidosecurity/local-scanner:${PARAM_SCANNER_VERSION}" \
     image-scan "${image}" \
-    --apikey "${API_KEY}" "${FORCE_IMG_CREATION}" \
+    --apikey "${API_KEY}" \
     ${FAIL_ARG} ${PARAM_EXTRA_ARGS:-}
 }
 
